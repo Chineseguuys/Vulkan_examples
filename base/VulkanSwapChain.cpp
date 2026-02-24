@@ -10,6 +10,10 @@
 
 #include "VulkanSwapChain.h"
 
+#ifdef DEBUG
+#include "spdlog/spdlog.h"
+#endif
+
 /** @brief Creates the platform specific surface abstraction of the native platform window used for presentation */	
 #if defined(VK_USE_PLATFORM_WIN32_KHR)
 void VulkanSwapChain::initSurface(void* platformHandle, void* platformWindow)
@@ -123,6 +127,17 @@ void VulkanSwapChain::initSurface(screen_context_t screen_context, screen_window
     {
         vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface, &supportsPresent[i]);
     }
+
+#ifdef DEBUG
+    for (uint32_t i = 0; i < queueCount; ++i)
+    {
+        if (supportsPresent[i] == VK_TRUE) {
+            spdlog::info("[{}:{}]Queue Family {}: supports present", __FILE__, __LINE__, i);
+        } else {
+            spdlog::info("[{}:{}]Queue Family {}: does not supports present", __FILE__, __LINE__, i);
+        }
+    }
+#endif /* DEBUG */
 
     // Search for a graphics and a present queue in the array of queue
     // families, try to find one that supports both

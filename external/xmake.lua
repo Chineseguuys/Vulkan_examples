@@ -33,3 +33,7 @@ target("external_ktx")
     add_defines("KTX_OPENGL")
 
     add_includedirs("ktx/include/", {public = true})
+
+target("external_spdlog")
+    set_kind("static")
+    add_includedirs("spdlog/include/", {public = true})

@@ -5,6 +5,7 @@ set_toolchains("gcc")
 
 -- global definations
 add_defines("VK_USE_PLATFORM_XCB_KHR")
+-- add_defines("VK_USE_PLATFORM_WAYLAND_KHR")
 add_defines("IMGUI_NEW_VERSION_FIX")
 
 if is_mode("Debug") then

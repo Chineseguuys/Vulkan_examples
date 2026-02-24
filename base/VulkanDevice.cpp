@@ -15,6 +15,10 @@
 #include "VulkanDevice.h"
 #include <unordered_set>
 
+#ifdef DEBUG
+#include "spdlog/spdlog.h"
+#endif /* DEBUG */
+
 namespace vks
 {	
     /**
@@ -43,13 +47,14 @@ namespace vks
 #ifdef DEBUG
         for (auto& queueFamilyProp : queueFamilyProperties)
         {
-            std::cout << "Physical Device Queue Family:" << std::endl;
-            std::cout << "\tQueue Flags: " << std::hex << queueFamilyProp.queueFlags << std::endl;
-            std::cout << "\tQueue Count: " << queueFamilyProp.queueCount << std::endl;
-            std::cout << "\tTimestamp Valid Bits: " << queueFamilyProp.timestampValidBits << std::endl;
-            std::cout << "\tMin Image Transfer Granularity: " << queueFamilyProp.minImageTransferGranularity.width
-                << ", " << queueFamilyProp.minImageTransferGranularity.height << ", "
-                << queueFamilyProp.minImageTransferGranularity.depth << std::endl;
+            spdlog::info("[{}:{}]Physical Device Queue Family:", __FILE__, __LINE__);
+            spdlog::info("\tQueue Flags: {:x}", queueFamilyProp.queueFlags);
+            spdlog::info("\tQueue Count: {:d}", queueFamilyProp.queueCount);
+            spdlog::info("\tTimestamp Valid Bits: {:d}", queueFamilyProp.timestampValidBits);
+            spdlog::info("\tMin Image Transfer Granularity: {:d}, {:d}, {:d}",
+                queueFamilyProp.minImageTransferGranularity.width,
+                queueFamilyProp.minImageTransferGranularity.height,
+                queueFamilyProp.minImageTransferGranularity.depth);
         }
 #endif /* DEBUG */
 
@@ -64,7 +69,7 @@ namespace vks
                 for (auto& ext : extensions)
                 {
 #ifdef DEBUG
-                    std::cout << "Physical Device Extension: " << ext.extensionName << std::endl;
+                    spdlog::info("[{}:{}]Physical Device Extension: {:s}", __FILE__, __LINE__, ext.extensionName);
 #endif /* DEBUG */
                     supportedExtensions.push_back(ext.extensionName);
                 }

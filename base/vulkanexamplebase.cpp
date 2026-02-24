@@ -8,6 +8,10 @@
 
 #include "vulkanexamplebase.h"
 
+#ifdef DEBUG
+#include "spdlog/spdlog.h"
+#endif /* DEBUG */
+
 #if defined(VK_EXAMPLE_XCODE_GENERATED)
 #if (defined(VK_USE_PLATFORM_MACOS_MVK) || defined(VK_USE_PLATFORM_METAL_EXT))
 #include <Cocoa/Cocoa.h>
@@ -135,7 +139,7 @@ VkResult VulkanExampleBase::createInstance()
 #ifdef DEBUG
     // print all enabled instance extensions
     for (auto& extension : instanceExtensions) {
-        std::cout << "Enabled instance extension: " << extension << std::endl;
+        spdlog::info("[{}:{}]Enabled instance extension: {:s}", __FILE__, __LINE__, extension);
     }
 #endif /* DEBUG */
 
