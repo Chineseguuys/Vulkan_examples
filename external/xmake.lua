@@ -37,3 +37,8 @@ target("external_ktx")
 target("external_spdlog")
     set_kind("static")
     add_includedirs("spdlog/include/", {public = true})
+
+target("external_wayland-protocols")
+    set_kind("static")
+    add_files("wayland-protocols/xdg-shell-protocol.c")
+    add_includedirs("wayland-protocols/", {public = true})

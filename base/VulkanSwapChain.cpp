@@ -9,10 +9,29 @@
 */
 
 #include "VulkanSwapChain.h"
+#include <vulkan/vulkan_core.h>
 
 #ifdef DEBUG
 #include "spdlog/spdlog.h"
-#endif
+
+const static std::map<VkPresentModeKHR, std::string> PRESENTMEDE2STRING = {
+    {VK_PRESENT_MODE_IMMEDIATE_KHR, "VK_PRESENT_MODE_IMMEDIATE_KHR"},
+    {VK_PRESENT_MODE_MAILBOX_KHR, "VK_PRESENT_MODE_MAILBOX_KHR"},
+    {VK_PRESENT_MODE_FIFO_KHR, "VK_PRESENT_MODE_FIFO_KHR"},
+    {VK_PRESENT_MODE_FIFO_RELAXED_KHR, "VK_PRESENT_MODE_FIFO_RELAXED_KHR"},
+    {VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR, "VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR"},
+    {VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR, "VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR"},
+    {VK_PRESENT_MODE_FIFO_LATEST_READY_KHR, "VK_PRESENT_MODE_FIFO_LATEST_READY_KHR"},
+    {VK_PRESENT_MODE_FIFO_LATEST_READY_EXT, "VK_PRESENT_MODE_FIFO_LATEST_READY_EXT"},
+    {VK_PRESENT_MODE_MAX_ENUM_KHR, "VK_PRESENT_MODE_MAX_ENUM_KHR"}
+};
+
+void printPresentModes(const std::vector<VkPresentModeKHR>& presentModes) {
+    for (auto& presentMode : presentModes) {
+        spdlog::info("\t{}", PRESENTMEDE2STRING.at(presentMode));
+    }
+}
+#endif /* DEBUG */
 
 /** @brief Creates the platform specific surface abstraction of the native platform window used for presentation */	
 #if defined(VK_USE_PLATFORM_WIN32_KHR)
@@ -226,6 +245,9 @@ void VulkanSwapChain::create(uint32_t& width, uint32_t& height, bool vsync, bool
     // If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
     if (surfaceCaps.currentExtent.width == (uint32_t)-1) {
         // If the surface size is undefined, the size is set to the size of the images requested
+#ifdef DEBUG
+        spdlog::info("[{}:{}]SwapchainExtent undefined! Using default size: {}x{}", __FILE__, __LINE__, width, height);
+#endif /* DEBUG */
         swapchainExtent.width = width;
         swapchainExtent.height = height;
     } else {
@@ -233,6 +255,9 @@ void VulkanSwapChain::create(uint32_t& width, uint32_t& height, bool vsync, bool
         swapchainExtent = surfaceCaps.currentExtent;
         width = surfaceCaps.currentExtent.width;
         height = surfaceCaps.currentExtent.height;
+#ifdef DEBUG
+        spdlog::info("[{}:{}]SwapchainExtent defined! Using size: {}x{}", __FILE__, __LINE__, width, height);
+#endif /* DEBUG */
     }
 
 
@@ -247,6 +272,10 @@ void VulkanSwapChain::create(uint32_t& width, uint32_t& height, bool vsync, bool
     // The VK_PRESENT_MODE_FIFO_KHR mode must always be present as per spec
     // This mode waits for the vertical blank ("v-sync")
     VkPresentModeKHR swapchainPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+#ifdef DEBUG
+    spdlog::info("[{}:{}]Physical Device supports {} present modes", __FILE__, __LINE__, presentModeCount );
+    printPresentModes(presentModes);
+#endif /* DEBUG */
 
     // If v-sync is not requested, try to find a mailbox mode
     // It's the lowest latency non-tearing present mode available

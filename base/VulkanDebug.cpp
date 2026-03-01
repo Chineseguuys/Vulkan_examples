@@ -8,6 +8,7 @@
 
 #include "VulkanDebug.h"
 #include <iostream>
+#include <vulkan/vulkan_core.h>
 
 namespace vks
 {

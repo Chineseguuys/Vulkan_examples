@@ -3,9 +3,20 @@
 set_project("vulkan-examples")
 set_toolchains("gcc")
 
+-- control the window system to use
+-- use wayland, it can not be captured by renderdoc
+-- renderdoc does not support wayland yet
+local use_wayland = false 
+-- use xcb, it can be captured by renderdoc
+local use_xcb = true 
+
 -- global definations
-add_defines("VK_USE_PLATFORM_XCB_KHR")
--- add_defines("VK_USE_PLATFORM_WAYLAND_KHR")
+if use_xcb then
+    add_defines("VK_USE_PLATFORM_XCB_KHR")
+end
+if use_wayland then
+    add_defines("VK_USE_PLATFORM_WAYLAND_KHR")
+end
 add_defines("IMGUI_NEW_VERSION_FIX")
 
 if is_mode("Debug") then
@@ -17,13 +28,20 @@ if is_mode("Debug") then
     add_ldflags("-g")
 end
 
-includes("base")
 includes("external")
+includes("base")
 
 
 target("example")
     set_kind("binary")
     add_files("examples/triangle/triangle.cpp")
 
-    add_deps("base", "external_imgui", "external_ktx")
-    add_links("vulkan", "xcb")
+    add_deps("base", "external_imgui", "external_ktx", "external_wayland-protocols")
+    if use_xcb then
+        -- if use xcb, you need to link xcb
+        add_links("vulkan", "xcb")
+    end
+    if use_wayland then
+        -- if use wayland, you need to link wayland-client
+        add_links("vulkan", "wayland-client")
+    end

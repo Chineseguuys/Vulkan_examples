@@ -18,6 +18,7 @@
 #include <fstream>
 #include <vector>
 #include <exception>
+#include <vulkan/vulkan_core.h>
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -26,6 +27,10 @@
 
 #include <vulkan/vulkan.h>
 #include "vulkanexamplebase.h"
+
+#ifdef DEBUG
+#include "spdlog/spdlog.h"
+#endif /* DEBUG */
 
 // We want to keep GPU and CPU busy. To do that we may start building a new command buffer while the previous one is still being executed
 // This number defines how many frames may be worked on simultaneously at once
@@ -235,7 +240,7 @@ public:
         uint32_t vertexBufferSize = static_cast<uint32_t>(vertexBuffer.size()) * sizeof(Vertex);
 
         // Setup indices
-        std::vector<uint32_t> indexBuffer{ 0, 1, 2 };
+        std::vector<uint32_t> indexBuffer{ 0, 1, 2};
         indices.count = static_cast<uint32_t>(indexBuffer.size());
         uint32_t indexBufferSize = indices.count * sizeof(uint32_t);
 
@@ -278,6 +283,12 @@ public:
         VK_CHECK_RESULT(vkCreateBuffer(device, &vertexBufferInfoCI, nullptr, &stagingBuffers.vertices.buffer));
         vkGetBufferMemoryRequirements(device, stagingBuffers.vertices.buffer, &memReqs);
         memAlloc.allocationSize = memReqs.size;
+#ifdef DEBUG
+        spdlog::info("[{}:{}]Vertex Buffer Memory Requirements:", __FILE__, __LINE__);
+        spdlog::info("\t Vertex Buffer Size: {:d}", vertexBufferSize);
+        spdlog::info("\t Memory Required Size: {:d}", memReqs.size);
+        spdlog::info("\t Memory Type Bits: {:x} or {:b}", memReqs.memoryTypeBits, memReqs.memoryTypeBits);
+#endif /* DEBUG */
         // Request a host visible memory type that can be used to copy our data to
         // Also request it to be coherent, so that writes are visible to the GPU right after unmapping the buffer
         memAlloc.memoryTypeIndex = getMemoryTypeIndex(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);

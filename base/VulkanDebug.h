@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <vector>
 #include <sstream>
+#include <vulkan/vulkan_core.h>
 #ifdef _WIN32
 #include <windows.h>
 #include <fcntl.h>

@@ -1,4 +1,5 @@
 -- prerequisites
+-- do not use system installed, use which we built
 -- add_requires("spdlog", {system = true})
 
 set_project("base")
@@ -18,8 +19,7 @@ end
 target("base")
     set_kind("static")
     add_files("./*.cpp")
-    add_includedirs("../external/ktx/include/")
-    add_includedirs("../external/imgui/")
-    add_includedirs("../external/imgui/backends/")
-    add_includedirs("../external/spdlog/include/")
+    -- Do not need to use add_includedirs, use add_deps instead
+    -- deps has been added in present xmake lua, so sub can use it directly
+    add_deps("external_wayland-protocols", "external_imgui", "external_ktx", "external_spdlog")
     add_includedirs("./", {public = true})

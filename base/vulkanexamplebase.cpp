@@ -1089,6 +1089,12 @@ bool VulkanExampleBase::initVulkan()
     vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
     vkGetPhysicalDeviceMemoryProperties(physicalDevice, &deviceMemoryProperties);
 
+#ifdef DEBUG
+    spdlog::info("[{}:{}]DeviceMemoryProperties:", __FILE__, __LINE__);
+    spdlog::info("\t Memory Type Count: {:d}", deviceMemoryProperties.memoryTypeCount);
+    spdlog::info("\t Memory Heap Count: {:d}", deviceMemoryProperties.memoryHeapCount);
+#endif /* DEBUG */
+
     // Derived examples can override this to set actual features (based on above readings) to enable for logical device creation
     getEnabledFeatures();
 

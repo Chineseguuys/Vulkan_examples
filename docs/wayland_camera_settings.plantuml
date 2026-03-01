@@ -1,0 +1,28 @@
+@startuml
+user --> vulkanexamplebase : VulkanExampleBase()
+activate vulkanexamplebase
+
+vulkanexamplebase --> vulkanexamplebase : initWaylandConnection()
+activate vulkanexamplebase
+note right
+    { registryGlobalCb, registryGlobalRemoveCb };
+    wl_registry_add_listener(registry, &registry_listener, this);
+end note
+
+vulkanexamplebase --> wayland_server : wl_registry_add_listener(registry_listener)
+activate wayland_server
+
+wayland_server --> vulkanexamplebase : return
+deactivate wayland_server
+
+vulkanexamplebase --> wayland_server : wl_display_roundtrip(display)
+activate wayland_server
+note right
+callback will called
+end note
+
+wayland_server --> vulkanexamplebase : registryGlobalCb()
+vulkanexamplebase --> vulkanexamplebase : registryGlobal()
+vulkanexamplebase --> wayland_server : wl_seat_add_listener()
+
+@enduml
