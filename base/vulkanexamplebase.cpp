@@ -3046,6 +3046,9 @@ void VulkanExampleBase::setupFrameBuffer()
     if (useDynamicRendering) {
         // When dynamic rendering is enabled, render passes are no longer required
         renderPass = VK_NULL_HANDLE;
+#ifdef DEBUG
+        spdlog::info("Dynamic rendering is enabled, Frame Buffer are no longer required");
+#endif /* DEBUG */
         return;
     }
     // Create frame buffers for every swap chain image, only one depth/stencil attachment is required, as this is owned by the application
@@ -3070,6 +3073,9 @@ void VulkanExampleBase::setupRenderPass()
     if (useDynamicRendering) {
         // When dynamic rendering is enabled, render passes are no longer required
         renderPass = VK_NULL_HANDLE;
+#ifdef DEBUG
+        spdlog::info("Dynamic rendering is enabled, render pass is not required");
+#endif
         return;
     }
     std::array<VkAttachmentDescription, 2> attachments{

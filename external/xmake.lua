@@ -42,3 +42,7 @@ target("external_wayland-protocols")
     set_kind("static")
     add_files("wayland-protocols/xdg-shell-protocol.c")
     add_includedirs("wayland-protocols/", {public = true})
+
+target("external_tinygltf")
+    set_kind("headeronly")
+    add_includedirs("tinygltf/", {public = true})

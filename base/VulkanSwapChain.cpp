@@ -319,6 +319,9 @@ void VulkanSwapChain::create(uint32_t& width, uint32_t& height, bool vsync, bool
         VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR,
         VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR,
     };
+#ifdef DEBUG
+    spdlog::info("[{}:{}]Supported composite alpha flags:{:b}", __FILE__, __LINE__, surfaceCaps.supportedCompositeAlpha);
+#endif /* DEBUG */
     for (auto& compositeAlphaFlag : compositeAlphaFlags) {
         if (surfaceCaps.supportedCompositeAlpha & compositeAlphaFlag) {
             compositeAlpha = compositeAlphaFlag;

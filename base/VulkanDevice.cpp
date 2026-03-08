@@ -69,7 +69,7 @@ namespace vks
                 for (auto& ext : extensions)
                 {
 #ifdef DEBUG
-                    spdlog::info("[{}:{}]Physical Device Extension: {:s}", __FILE__, __LINE__, ext.extensionName);
+                    spdlog::trace("[{}:{}]Physical Device Extension: {:s}", __FILE__, __LINE__, ext.extensionName);
 #endif /* DEBUG */
                     supportedExtensions.push_back(ext.extensionName);
                 }

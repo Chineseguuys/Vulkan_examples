@@ -18,6 +18,7 @@ if use_wayland then
     add_defines("VK_USE_PLATFORM_WAYLAND_KHR")
 end
 add_defines("IMGUI_NEW_VERSION_FIX")
+add_defines("YJH_STABILITY_FIX")
 
 if is_mode("Debug") then
     set_symbols("debug")
@@ -34,7 +35,7 @@ includes("base")
 
 target("example")
     set_kind("binary")
-    add_files("examples/triangle/triangle.cpp")
+    add_files("examples/pipelines/pipelines.cpp")
 
     add_deps("base", "external_imgui", "external_ktx", "external_wayland-protocols")
     if use_xcb then
