@@ -2590,6 +2590,9 @@ void VulkanExampleBase::handleEvent(const xcb_generic_event_t *event)
     break;
     case XCB_BUTTON_PRESS:
     {
+#ifdef DEBUG
+        spdlog::info("XCB_BUTTON_PRESS");
+#endif /* DEBUG */
         xcb_button_press_event_t *press = (xcb_button_press_event_t *)event;
         if (press->detail == XCB_BUTTON_INDEX_1)
             mouseState.buttons.left = true;
@@ -2612,6 +2615,9 @@ void VulkanExampleBase::handleEvent(const xcb_generic_event_t *event)
     break;
     case XCB_KEY_PRESS:
     {
+#ifdef DEBUG
+        spdlog::info("XCB_KEY_PRESS");
+#endif /* DEBUG */
         const xcb_key_release_event_t *keyEvent = (const xcb_key_release_event_t *)event;
         switch (keyEvent->detail)
         {
