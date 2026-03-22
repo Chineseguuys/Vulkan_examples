@@ -46,3 +46,13 @@ target("external_wayland-protocols")
 target("external_tinygltf")
     set_kind("headeronly")
     add_includedirs("tinygltf/", {public = true})
+
+target("external_perfetto_sdk")
+    set_kind("static")
+    add_includedirs("perfetto/sdk/", {public = true})
+    add_files("perfetto/sdk/perfetto.cc")
+
+target("VK_LAYER_LUNARG_vulkan_ftrace")
+    set_kind("shared")
+    add_includedirs("vulkan_ftrace_layer/", {public = false})
+    add_deps("external_perfetto_sdk")
