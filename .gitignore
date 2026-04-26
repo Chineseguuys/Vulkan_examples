@@ -10,3 +10,6 @@ compile_commands.json
 
 # imgui cache
 imgui.ini
+
+# clangd format file
+.clang-format

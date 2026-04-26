@@ -21,5 +21,5 @@ target("base")
     add_files("./*.cpp")
     -- Do not need to use add_includedirs, use add_deps instead
     -- deps has been added in present xmake lua, so sub can use it directly
-    add_deps("external_wayland-protocols", "external_imgui", "external_ktx", "external_spdlog", "external_tinygltf")
+    add_deps("external_wayland-protocols", "external_imgui", "external_ktx", "external_spdlog", "external_tinygltf", "external_perfetto_sdk")
     add_includedirs("./", {public = true})

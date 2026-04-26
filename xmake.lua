@@ -20,6 +20,9 @@ end
 add_defines("IMGUI_NEW_VERSION_FIX")
 add_defines("YJH_STABILITY_FIX")
 
+-- perfetto systrace print
+add_defines("PERFETTO_SYSTRACE_PRINT")
+
 if is_mode("Debug") then
     set_symbols("debug")
     set_optimize("none")
@@ -37,7 +40,7 @@ target("example")
     set_kind("binary")
     add_files("examples/pipelines/pipelines.cpp")
 
-    add_deps("base", "external_imgui", "external_ktx", "external_wayland-protocols")
+    add_deps("base", "external_imgui", "external_ktx", "external_wayland-protocols", "external_perfetto_sdk")
     if use_xcb then
         -- if use xcb, you need to link xcb
         add_links("vulkan", "xcb")
