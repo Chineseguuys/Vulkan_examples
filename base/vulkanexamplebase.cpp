@@ -267,6 +267,9 @@ VkPipelineShaderStageCreateInfo VulkanExampleBase::loadShader(std::string fileNa
     shaderStage.module = vks::tools::loadShader(fileName.c_str(), device);
 #endif
     assert(shaderStage.module != VK_NULL_HANDLE);
+#ifdef DEBUG
+    spdlog::info("[{}:{}]Load Shader: {}", __FILE__, __LINE__, fileName);
+#endif // DEBUG
     shaderModules.push_back(shaderStage.module);
     return shaderStage;
 }
@@ -2678,6 +2681,9 @@ void VulkanExampleBase::setupRenderPass() {
         .dependencyCount = static_cast<uint32_t>(dependencies.size()),
         .pDependencies = dependencies.data(),
     };
+#ifdef DEBUG
+    spdlog::info("[{}:{}]Create Render Pass", __FILE__, __LINE__);
+#endif // DEBUG
     VK_CHECK_RESULT(vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass));
 }
 
