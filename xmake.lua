@@ -38,7 +38,7 @@ includes("base")
 
 target("example")
     set_kind("binary")
-    add_files("examples/texturecubemap/texturecubemap.cpp")
+    add_files("examples/subpasses/subpasses.cpp")
 
     add_deps("base", "external_imgui", "external_ktx", "external_wayland-protocols", "external_perfetto_sdk")
     if use_xcb then

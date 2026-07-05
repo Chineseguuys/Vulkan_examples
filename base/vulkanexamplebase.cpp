@@ -600,6 +600,14 @@ void VulkanExampleBase::updateOverlay() {
                  ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
     ImGui::TextUnformatted(title.c_str());
     ImGui::TextUnformatted(deviceProperties.deviceName);
+    ImGui::Text("Driver Version: %d.%d.%d",
+                VK_VERSION_MAJOR(deviceProperties.driverVersion),
+                VK_VERSION_MINOR(deviceProperties.driverVersion),
+                VK_VERSION_PATCH(deviceProperties.driverVersion));
+    ImGui::Text("API Version: %d.%d.%d",
+                VK_VERSION_MAJOR(deviceProperties.apiVersion),
+                VK_VERSION_MINOR(deviceProperties.apiVersion),
+                VK_VERSION_PATCH(deviceProperties.apiVersion));
     ImGui::Text("%.2f ms/frame (%.1d fps)", (1000.0f / lastFPS), lastFPS);
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 5.0f * ui.scale));

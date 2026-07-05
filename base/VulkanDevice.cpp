@@ -415,6 +415,11 @@ namespace vks
         // Find a memory type index that fits the properties of the buffer
         memAlloc.memoryTypeIndex = getMemoryType(memReqs.memoryTypeBits, memoryPropertyFlags);
         // If the buffer has VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT set we also need to enable the appropriate flag during allocation
+        // Vulkan 1.0 中，Shader 访问 buffer 必须通过 Descriptor Set（把 buffer 绑定到 binding=N）。
+        // Device Address 机制（Vulkan 1.1+，VK_KHR_buffer_device_address）提供了另一种方式：
+        // shader 直接通过 GPU 虚拟地址访问 buffer。设置这个 flag 后，可以用 vkGetBufferDeviceAddress 
+        // 获取该 buffer 在 GPU 地址空间中的 64 位地址，然后通过 push constants 或 UBO 把地址传给 shader，
+        // shader 在 GLSL 中用指针语法直接读写
         VkMemoryAllocateFlagsInfoKHR allocFlagsInfo{};
         if (usageFlags & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT) {
             allocFlagsInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO_KHR;
