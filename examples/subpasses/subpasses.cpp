@@ -480,7 +480,7 @@ public:
 
         // Sets per frame, just like the buffers themselves
         // Images and static buffers do not need to be duplicated per frame, we reuse the same one for each frame
-        for (auto i = 0; i < uniformBuffers.size(); i++) {		
+        for (auto i = 0; i < uniformBuffers.size(); i++) {
             // Scene
             VkDescriptorSetAllocateInfo allocInfo = vks::initializers::descriptorSetAllocateInfo(descriptorPool, &descriptorSetLayouts.scene, 1);
             VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &descriptorSets[i].scene));
@@ -489,7 +489,7 @@ public:
                 vks::initializers::writeDescriptorSet(descriptorSets[i].scene, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 0, &uniformBuffers[i].GBuffer.descriptor)
             };
             vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
-            
+
             // Transparent (forward) pipeline
             allocInfo = vks::initializers::descriptorSetAllocateInfo(descriptorPool, &descriptorSetLayouts.transparent, 1);
             VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &descriptorSets[i].transparent));
@@ -499,7 +499,7 @@ public:
                 vks::initializers::writeDescriptorSet(descriptorSets[i].transparent, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 2, &textures.glass.descriptor),
             };
             vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, NULL);
-            
+
             // Composition pass
             allocInfo = vks::initializers::descriptorSetAllocateInfo(descriptorPool, &descriptorSetLayouts.composition, 1);
             VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &descriptorSets[i].composition));
