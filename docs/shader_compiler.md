@@ -65,7 +65,8 @@ glslangValidator -V shader.comp -o shader.comp.spv
 | `-V` | 生成 Vulkan 兼容的 SPIR-V（必需） |
 | `-o <file>` | 输出文件路径 |
 | `-S <stage>` | 手动指定 shader stage（vert / frag / comp 等），省略时根据文件扩展名推断 |
-| `-g` | 生成调试信息（带 `OpLine` / `OpSource`） |
+| `-g` | 生成基础调试信息（带 `OpLine` / `OpSource`，仅行号映射） |
+| `-gVS` | 生成完整调试信息（`NonSemantic.Shader.DebugInfo.100` 扩展，保留变量名/类型名/作用域） |
 | `-Os` | 优化生成的 SPIR-V |
 | `-D<name>` / `-D<name>=<value>` | 定义预处理器宏 |
 | `-I<dir>` | 添加 include 搜索路径 |
@@ -154,9 +155,17 @@ dxc -spirv -T cs_6_0 -E main -Fo shader.comp.spv shader.comp
 | `-T <profile>` | Shader profile（见上表） |
 | `-E <name>` | 入口函数名（HLSL 不强制 `main`，需显式指定） |
 | `-Fo <file>` | 输出文件路径 |
-| `-Zi` | 生成调试信息 |
+| `-Zi` | 生成基础调试信息（嵌入 HLSL 源码，仅行号映射） |
+| `-fspv-debug=vulkan-with-source` | 生成完整调试信息（`NonSemantic.Shader.DebugInfo.100` 扩展，保留变量名/类型名） |
 | `-O0` / `-O3` | 优化等级 |
 | `-fspv-target-env=vulkan1.3` | 指定目标 Vulkan 版本 |
+
+DXC 中启用完整 SPIR-V 调试信息需**同时指定** `-Zi` 和 `-fspv-debug=vulkan-with-source`：
+
+```bash
+dxc -spirv -T vs_6_0 -E main -Zi -fspv-debug=vulkan-with-source \
+    -Fo shader.vert.spv shader.vert
+```
 
 #### 安装编译器
 
@@ -273,6 +282,101 @@ cd slang
 cmake --preset default
 cmake --build --preset release
 ```
+
+---
+
+## SPIR-V 调试信息
+
+### 问题
+
+GLSL / HLSL / Slang 源码编译为 SPIR-V 后，原始变量名、类型名、注释和控制流结构全部丢失。当 RenderDoc 等工具对 SPIR-V 做反编译时，会生成类似 `_123`、`_var0` 的自动命名变量，控制流也被摊平成 `goto` 风格的跳转，与原始源码几乎无法对应，调试体验极差。
+
+### SPIR-V 的两级调试信息
+
+SPIR-V 规范提供了两级调试信息嵌入机制, 类似于 C/C++ 编译中 `-g` (行号) 与完整 DWARF 调试信息的区别：
+
+| 级别 | SPIR-V 指令 | 信息内容 | 编译器 flag |
+|------|------------|---------|------------|
+| **基础行号** | `OpLine` / `OpSource` | 源文件名 + 行号映射 | `-g`（各编译器通用） |
+| **完整调试信息** | `NonSemantic.Shader.DebugInfo.100` 扩展指令集 | 原始变量名、类型名、函数签名、作用域层级、源码全文 | `-gVS`（glslang）/ `-fspv-debug=vulkan-with-source`（dxc）/ `-g`（slangc） |
+
+`NonSemantic.Shader.DebugInfo.100` 是 SPIR-V 的扩展指令集（需要 SPIR-V 1.4+），作用等同于 C/C++ 中的 DWARF——所有 `NonSemantic` 前缀的指令在驱动创建 `VkShaderModule` 时自动被跳过，不影响 GPU 执行。
+
+### 各编译器的启用方式
+
+#### GLSL
+
+```bash
+# 仅基础行号 (OpLine / OpSource)
+glslc -g shader.vert -o shader.vert.spv
+glslangValidator -V -g shader.vert -o shader.vert.spv
+
+# 完整调试信息 (NonSemantic.Shader.DebugInfo.100)
+# 注意: glslc 不支持此扩展, 必须使用 glslangValidator
+glslangValidator -V -gVS shader.vert -o shader.vert.spv
+```
+
+`-gVS` 中的 "VS" 代表 "Vulkan Semantics"。
+
+#### HLSL (dxc)
+
+```bash
+# 仅基础行号
+dxc -spirv -T vs_6_0 -E main -Zi -Fo shader.vert.spv shader.vert
+
+# 完整调试信息 (NonSemantic.Shader.DebugInfo.100)
+# -Zi 嵌入 HLSL 源码, -fspv-debug=vulkan-with-source 生成 NonSemantic 扩展指令
+dxc -spirv -T vs_6_0 -E main -Zi -fspv-debug=vulkan-with-source \
+    -Fo shader.vert.spv shader.vert
+```
+
+`-Zi` 和 `-fspv-debug=vulkan-with-source` 需要同时指定。
+
+#### Slang
+
+```bash
+# 完整调试信息 (NonSemantic.Shader.DebugInfo.100)
+slangc shader.slang -target spirv -entry vertexMain -stage vertex \
+    -g -o shader.vert.spv -force-glsl-scalar-layout
+```
+
+Slang 的 `-g` 默认生成完整调试信息（NonSemantic 扩展），而非仅行号。
+
+### RenderDoc 中的表现
+
+| 编译 flag | RenderDoc shader 调试器中看到的内容 |
+|---|---|
+| 无 flag | 反编译后的 GLSL，变量名全部是 `_0`、`_var1` 等自动生成名，控制流摊平，几乎无法阅读 |
+| 基础行号 (`-g`/`-Zi`) | 反编译代码 + 行号标注，可在源码视图跳转到对应行，但变量名仍然丢失 |
+| 完整调试 (`-gVS`/`-fspv-debug=vulkan-with-source`) | 原始源码视图，保留全部变量名、类型名、函数签名，可以像调试 C++ 一样单步调试、查看变量值 |
+
+RenderDoc 1.27+ 版本完整支持 `NonSemantic.Shader.DebugInfo.100`。早期版本可能仅部分解析。
+
+### 代价与注意事项
+
+1. **SPIR-V 体积增大**。NonSemantic 扩展会嵌入完整的源码字符串和符号表，`.spv` 文件体积显著增加（可能数倍于无调试信息的版本）。但这不影响运行时性能——驱动在创建 `VkShaderModule` 时会跳过所有 NonSemantic 指令。
+
+2. **发布构建应去掉**。调试信息改变 SPIR-V 的字节级内容，可能触发不同的驱动 shader 缓存键。生产环境应使用不带 `-g`/`-gVS` 的编译产物。
+
+3. **Vulkan 版本要求**。`NonSemantic.Shader.DebugInfo.100` 需要 SPIR-V 1.4+，即 Vulkan 1.1 + `VK_KHR_spirv_1_4`。主流驱动（NVIDIA 545+、AMD RADV 24+、Mesa 23+）均已支持。
+
+4. **驱动程序兼容性**。NonSemantic 指令按 SPIR-V 规范属于 "可安全跳过" 类型，所有符合规范的驱动都应正确处理。但极少数老驱动可能存在解析问题，如果在 `vkCreateShaderModule` 时报错，优先升级驱动或回退到仅行号的 `-g`。
+
+### 实战：完整调试信息编译示例
+
+以本项目 subpasses 示例的 shader 为例：
+
+```bash
+# GLSL — 将 glslc 替换为 glslangValidator + -gVS
+glslangValidator -V -gVS gbuffer.vert -o gbuffer.vert.spv
+glslangValidator -V -gVS gbuffer.frag -o gbuffer.frag.spv
+glslangValidator -V -gVS composition.vert -o composition.vert.spv
+glslangValidator -V -gVS composition.frag -o composition.frag.spv
+glslangValidator -V -gVS transparent.vert -o transparent.vert.spv
+glslangValidator -V -gVS transparent.frag -o transparent.frag.spv
+```
+
+编译完成后，在 RenderDoc 中捕获帧 → 选中 draw call → 进入 shader 调试器，即可看到保留原始变量名的源码视图，而不再是反编译后的混杂代码。
 
 ---
 

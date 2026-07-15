@@ -24,16 +24,16 @@ out gl_PerVertex
 void main() 
 {
     gl_Position = ubo.projection * ubo.view * ubo.model * inPos;
-    
+
     // Vertex position in world space
     outWorldPos = vec3(ubo.model * inPos);
     // GL to Vulkan coord space
     outWorldPos.y = -outWorldPos.y;
-    
+
     // Normal in world space
     mat3 mNormal = transpose(inverse(mat3(ubo.model)));
     outNormal = mNormal * normalize(inNormal);	
-    
+
     // Currently just vertex color
     outColor = inColor;
 }
