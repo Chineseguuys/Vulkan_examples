@@ -11,9 +11,8 @@
 #include "VulkanSwapChain.h"
 #include <vulkan/vulkan_core.h>
 
-#ifdef DEBUG
-#include "spdlog/spdlog.h"
-
+#if defined(DEBUG) or defined(ANDROID_DEBUG)
+#include <map>
 const static std::map<VkPresentModeKHR, std::string> PRESENTMEDE2STRING = {
     {VK_PRESENT_MODE_IMMEDIATE_KHR, "VK_PRESENT_MODE_IMMEDIATE_KHR"},
     {VK_PRESENT_MODE_MAILBOX_KHR, "VK_PRESENT_MODE_MAILBOX_KHR"},
@@ -25,6 +24,10 @@ const static std::map<VkPresentModeKHR, std::string> PRESENTMEDE2STRING = {
     {VK_PRESENT_MODE_FIFO_LATEST_READY_EXT, "VK_PRESENT_MODE_FIFO_LATEST_READY_EXT"},
     {VK_PRESENT_MODE_MAX_ENUM_KHR, "VK_PRESENT_MODE_MAX_ENUM_KHR"}
 };
+#endif /* defined(DEBUG) or defined(ANDROID_DEBUG) */
+
+#if defined(DEBUG)
+#include "spdlog/spdlog.h"
 
 void printPresentModes(const std::vector<VkPresentModeKHR>& presentModes) {
     for (auto& presentMode : presentModes) {
@@ -32,6 +35,15 @@ void printPresentModes(const std::vector<VkPresentModeKHR>& presentModes) {
     }
 }
 #endif /* DEBUG */
+
+#if defined(ANDROID_DEBUG)
+#include "VulkanAndroid.h"
+void printPresentModes(const std::vector<VkPresentModeKHR>& presentModes) {
+    for (auto& presentMode : presentModes) {
+        LOGI("\t%s", PRESENTMEDE2STRING.at(presentMode).c_str());
+    }
+}
+#endif /* defined(ANDROID_DEBUG) */
 
 /** @brief Creates the platform specific surface abstraction of the native platform window used for presentation */	
 #if defined(VK_USE_PLATFORM_WIN32_KHR)
@@ -147,7 +159,7 @@ void VulkanSwapChain::initSurface(screen_context_t screen_context, screen_window
         vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface, &supportsPresent[i]);
     }
 
-#ifdef DEBUG
+#if defined(DEBUG) 
     for (uint32_t i = 0; i < queueCount; ++i)
     {
         if (supportsPresent[i] == VK_TRUE) {
@@ -157,6 +169,16 @@ void VulkanSwapChain::initSurface(screen_context_t screen_context, screen_window
         }
     }
 #endif /* DEBUG */
+
+#if defined(ANDROID_DEBUG)
+    for (uint32_t i = 0; i < queueCount; ++i) {
+        if (supportsPresent[i] == VK_TRUE) {
+            LOGI("[%s:%d]Queue Family %d: supports present", __FILE__, __LINE__, i);
+        } else {
+            LOGI("[%s:%d]Queue Family %d: does not supports present", __FILE__, __LINE__, i);
+        }
+    }
+#endif /* defined(ANDROID_DEBUG) */
 
     // Search for a graphics and a present queue in the array of queue
     // families, try to find one that supports both
@@ -245,9 +267,13 @@ void VulkanSwapChain::create(uint32_t& width, uint32_t& height, bool vsync, bool
     // If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
     if (surfaceCaps.currentExtent.width == (uint32_t)-1) {
         // If the surface size is undefined, the size is set to the size of the images requested
-#ifdef DEBUG
+#if defined(DEBUG) 
         spdlog::info("[{}:{}]SwapchainExtent undefined! Using default size: {}x{}", __FILE__, __LINE__, width, height);
 #endif /* DEBUG */
+
+#if defined(ANDROID_DEBUG)
+        LOGI("[%s:%d]SwapchainExtent undefined! Using default size: %dx%d", __FILE__, __LINE__, width, height);
+#endif /* ANDROID_DEBUG */
         swapchainExtent.width = width;
         swapchainExtent.height = height;
     } else {
@@ -255,9 +281,13 @@ void VulkanSwapChain::create(uint32_t& width, uint32_t& height, bool vsync, bool
         swapchainExtent = surfaceCaps.currentExtent;
         width = surfaceCaps.currentExtent.width;
         height = surfaceCaps.currentExtent.height;
-#ifdef DEBUG
+#if defined(DEBUG) 
         spdlog::info("[{}:{}]SwapchainExtent defined! Using size: {}x{}", __FILE__, __LINE__, width, height);
 #endif /* DEBUG */
+
+#if defined(ANDROID_DEBUG)
+        LOGI("[%s:%d]SwapchainExtent defined! Using size: %dx%d", __FILE__, __LINE__, width, height);
+#endif
     }
 
 
@@ -272,10 +302,15 @@ void VulkanSwapChain::create(uint32_t& width, uint32_t& height, bool vsync, bool
     // The VK_PRESENT_MODE_FIFO_KHR mode must always be present as per spec
     // This mode waits for the vertical blank ("v-sync")
     VkPresentModeKHR swapchainPresentMode = VK_PRESENT_MODE_FIFO_KHR;
-#ifdef DEBUG
+#if defined(DEBUG)
     spdlog::info("[{}:{}]Physical Device supports {} present modes", __FILE__, __LINE__, presentModeCount );
     printPresentModes(presentModes);
 #endif /* DEBUG */
+
+#if defined(ANDROID_DEBUG)
+    LOGI("[%s:%d]Physical Device supports %d present modes", __FILE__, __LINE__, presentModeCount);
+    printPresentModes(presentModes);
+#endif /* ANDROID_DEBUG */
 
     // If v-sync is not requested, try to find a mailbox mode
     // It's the lowest latency non-tearing present mode available
@@ -301,6 +336,16 @@ void VulkanSwapChain::create(uint32_t& width, uint32_t& height, bool vsync, bool
         desiredNumberOfSwapchainImages = surfaceCaps.maxImageCount;
     }
 
+#if defined(DEBUG) 
+    spdlog::info("[{}:{}]Desired number of swapchain images: {}, min: {}, max: {}", __FILE__, __LINE__,
+        desiredNumberOfSwapchainImages, surfaceCaps.minImageCount, surfaceCaps.maxImageCount);
+#endif /* DEBUG */
+
+#if defined(ANDROID_DEBUG)
+    LOGI("[%s:%d]Desired number of swapchain images: %d, min: %d, max: %d", __FILE__, __LINE__,
+        desiredNumberOfSwapchainImages, surfaceCaps.minImageCount, surfaceCaps.maxImageCount);
+#endif /* ANDROID_DEBUG */
+
     // Find the transformation of the surface
     VkSurfaceTransformFlagsKHR preTransform;
     if (surfaceCaps.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR) {
@@ -319,9 +364,13 @@ void VulkanSwapChain::create(uint32_t& width, uint32_t& height, bool vsync, bool
         VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR,
         VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR,
     };
-#ifdef DEBUG
+#if defined(DEBUG) 
     spdlog::info("[{}:{}]Supported composite alpha flags:{:b}", __FILE__, __LINE__, surfaceCaps.supportedCompositeAlpha);
 #endif /* DEBUG */
+
+#if defined(ANDROID_DEBUG)
+    LOGI("[%s:%d]Supported composite alpha flags: %d", __FILE__, __LINE__, surfaceCaps.supportedCompositeAlpha);
+#endif
     for (auto& compositeAlphaFlag : compositeAlphaFlags) {
         if (surfaceCaps.supportedCompositeAlpha & compositeAlphaFlag) {
             compositeAlpha = compositeAlphaFlag;

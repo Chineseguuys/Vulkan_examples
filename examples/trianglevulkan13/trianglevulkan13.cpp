@@ -10,7 +10,14 @@
 * This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
 */
 
+#if defined(DEBUG)
 #include "spdlog/spdlog.h"
+#endif /* defined(DEBUG) */
+
+#if defined(ANDROID_DEBUG)
+#include "VulkanAndroid.h"
+#endif /* ANDROID_DEBUG */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -834,12 +841,19 @@ public:
 	}
 
 	// Override these as otherwise the base class would generate frame buffers and render passes
-#ifdef DEBUG
+#if defined(DEBUG) 
 	void setupFrameBuffer() override {
 		spdlog::info("Overriding setupFrameBuffer, do nothing!");
 	}
 	void setupRenderPass() override {
 		spdlog::info("Overriding setupRenderPass, do nothing!");
+	}
+#elif defined(ANDROID_DEBUG)
+	void setupFrameBuffer() override {
+		LOGI("[%s:%d]Overriding setupFrameBuffer, do nothing!", __FILE__, __LINE__);
+	}
+	void setupRenderPass() override {
+		LOGI("[%s:%d]Overriding setupRenderPass, do nothing!", __FILE__, __LINE__);
 	}
 #else
 	void setupFrameBuffer() override {}

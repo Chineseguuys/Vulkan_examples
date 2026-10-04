@@ -9,9 +9,11 @@
  * (http://opensource.org/licenses/MIT)
  */
 
+#if defined(PERFETTO_SYSTRACE_PRINT)
 #include "perfetto.h"
 PERFETTO_DEFINE_CATEGORIES(perfetto::Category("vulkan_example")
                                .SetDescription("Events from vulkan api calls"));
+#endif /* defined(PERFETTO_SYSTRACE_PRINT) */
 
 static void perfetto_systrace_init() {
 #if defined(PERFETTO_SYSTRACE_PRINT)

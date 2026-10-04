@@ -8,7 +8,7 @@
 
 #include "vulkanexamplebase.h"
 
-#ifdef DEBUG
+#if defined(DEBUG) 
 #include "spdlog/spdlog.h"
 #endif /* DEBUG */
 
@@ -141,12 +141,19 @@ VkResult VulkanExampleBase::createInstance() {
         instanceExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
     }
 
-#ifdef DEBUG
+#if defined(DEBUG) 
     // print all enabled instance extensions
     for (auto &extension : instanceExtensions) {
         spdlog::info("[{}:{}]Enabled instance extension: {:s}", __FILE__, __LINE__, extension);
     }
 #endif /* DEBUG */
+
+#if defined(ANDROID_DEBUG)
+    LOGI("[%s:%d]Enabled instance extensions:", __FILE__, __LINE__);
+    for (auto &extension : instanceExtensions) {
+        LOGI("  %s", extension);
+    }
+#endif /* defined(ANDROID_DEBUG) */
 
     if (!instanceExtensions.empty()) {
         instanceCreateInfo.enabledExtensionCount = (uint32_t)instanceExtensions.size();
@@ -267,9 +274,13 @@ VkPipelineShaderStageCreateInfo VulkanExampleBase::loadShader(std::string fileNa
     shaderStage.module = vks::tools::loadShader(fileName.c_str(), device);
 #endif
     assert(shaderStage.module != VK_NULL_HANDLE);
-#ifdef DEBUG
+#if defined(DEBUG) 
     spdlog::info("[{}:{}]Load Shader: {}", __FILE__, __LINE__, fileName);
 #endif // DEBUG
+
+#if defined(ANDROID_DEBUG)
+    LOGI("[%s:%d]Load Shader: %s", __FILE__, __LINE__, fileName.c_str());
+#endif /* defined(ANDROID_DEBUG) */
     shaderModules.push_back(shaderStage.module);
     return shaderStage;
 }
@@ -965,11 +976,17 @@ bool VulkanExampleBase::initVulkan() {
     vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
     vkGetPhysicalDeviceMemoryProperties(physicalDevice, &deviceMemoryProperties);
 
-#ifdef DEBUG
+#if defined(DEBUG) 
     spdlog::info("[{}:{}]DeviceMemoryProperties:", __FILE__, __LINE__);
     spdlog::info("\t Memory Type Count: {:d}", deviceMemoryProperties.memoryTypeCount);
     spdlog::info("\t Memory Heap Count: {:d}", deviceMemoryProperties.memoryHeapCount);
 #endif /* DEBUG */
+
+#if defined(ANDROID_DEBUG)
+    LOGI("[%s:%d]DeviceMemoryProperties:", __FILE__, __LINE__);
+    LOGI("\t Memory Type Count: %d", deviceMemoryProperties.memoryTypeCount);
+    LOGI("\t Memory Heap Count: %d", deviceMemoryProperties.memoryHeapCount);
+#endif /* defined(ANDROID_DEBUG) */
 
     // Derived examples can override this to set actual features (based on above readings) to enable for logical device
     // creation
@@ -2222,7 +2239,7 @@ void VulkanExampleBase::handleEvent(const xcb_generic_event_t *event) {
         break;
     } break;
     case XCB_BUTTON_PRESS: {
-#ifdef DEBUG
+#if defined(DEBUG) 
         spdlog::info("XCB_BUTTON_PRESS");
 #endif /* DEBUG */
         xcb_button_press_event_t *press = (xcb_button_press_event_t *)event;
@@ -2237,7 +2254,7 @@ void VulkanExampleBase::handleEvent(const xcb_generic_event_t *event) {
         if (press->detail == XCB_BUTTON_INDEX_3) mouseState.buttons.right = false;
     } break;
     case XCB_KEY_PRESS: {
-#ifdef DEBUG
+#if defined(DEBUG) 
         spdlog::info("XCB_KEY_PRESS");
 #endif /* DEBUG */
         const xcb_key_release_event_t *keyEvent = (const xcb_key_release_event_t *)event;
@@ -2601,9 +2618,13 @@ void VulkanExampleBase::setupFrameBuffer() {
     if (useDynamicRendering) {
         // When dynamic rendering is enabled, render passes are no longer required
         renderPass = VK_NULL_HANDLE;
-#ifdef DEBUG
+#if defined(DEBUG) 
         spdlog::info("Dynamic rendering is enabled, Frame Buffer are no longer required");
 #endif /* DEBUG */
+
+#if defined(ANDROID_DEBUG)
+        LOGI("[%s:%d]Dynamic rendering is enabled, Frame Buffer are no longer required", __FILE__, __LINE__);
+#endif /* defined(ANDROID_DEBUG) */
         return;
     }
     // Create frame buffers for every swap chain image, only one depth/stencil attachment is required, as this is owned
@@ -2626,9 +2647,13 @@ void VulkanExampleBase::setupRenderPass() {
     if (useDynamicRendering) {
         // When dynamic rendering is enabled, render passes are no longer required
         renderPass = VK_NULL_HANDLE;
-#ifdef DEBUG
+#if defined(DEBUG) 
         spdlog::info("Dynamic rendering is enabled, render pass is not required");
-#endif
+#endif /* DEBUG */
+
+#if defined(ANDROID_DEBUG)
+        LOGI("[%s:%d]Dynamic rendering is enabled, render pass is not required", __FILE__, __LINE__);
+#endif /* defined(ANDROID_DEBUG) */
         return;
     }
     std::array<VkAttachmentDescription, 2> attachments{
@@ -2689,9 +2714,13 @@ void VulkanExampleBase::setupRenderPass() {
         .dependencyCount = static_cast<uint32_t>(dependencies.size()),
         .pDependencies = dependencies.data(),
     };
-#ifdef DEBUG
+#if defined(DEBUG) 
     spdlog::info("[{}:{}]Create Render Pass", __FILE__, __LINE__);
 #endif // DEBUG
+
+#if defined(ANDROID_DEBUG)
+        LOGI("[%s:%d]Create Render Pass", __FILE__, __LINE__);
+#endif /* defined(ANDROID_DEBUG) */
     VK_CHECK_RESULT(vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass));
 }
 

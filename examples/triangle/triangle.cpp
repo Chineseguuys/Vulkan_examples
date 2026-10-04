@@ -28,9 +28,13 @@
 #include <vulkan/vulkan.h>
 #include "vulkanexamplebase.h"
 
-#ifdef DEBUG
+#if defined(DEBUG) 
 #include "spdlog/spdlog.h"
 #endif /* DEBUG */
+
+#if defined(ANDROID_DEBUG)
+#include "VulkanAndroid.h"
+#endif /* ANDROID_DEBUG */
 
 // We want to keep GPU and CPU busy. To do that we may start building a new command buffer while the previous one is still being executed
 // This number defines how many frames may be worked on simultaneously at once
@@ -283,12 +287,19 @@ public:
         VK_CHECK_RESULT(vkCreateBuffer(device, &vertexBufferInfoCI, nullptr, &stagingBuffers.vertices.buffer));
         vkGetBufferMemoryRequirements(device, stagingBuffers.vertices.buffer, &memReqs);
         memAlloc.allocationSize = memReqs.size;
-#ifdef DEBUG
+#if defined(DEBUG) 
         spdlog::info("[{}:{}]Vertex Buffer Memory Requirements:", __FILE__, __LINE__);
         spdlog::info("\t Vertex Buffer Size: {:d}", vertexBufferSize);
         spdlog::info("\t Memory Required Size: {:d}", memReqs.size);
         spdlog::info("\t Memory Type Bits: {:x} or {:b}", memReqs.memoryTypeBits, memReqs.memoryTypeBits);
 #endif /* DEBUG */
+
+#if defined(ANDROID_DEBUG)
+        LOGI("[%s:%d]Vertex Buffer Memory Requirements:", __FILE__, __LINE__);
+        LOGI("\t Vertex Buffer Size: %d", vertexBufferSize);
+        LOGI("\t Memory Required Size: %ld", memReqs.size);
+        LOGI("\t Memory Type Bits: %x or %b", memReqs.memoryTypeBits, memReqs.memoryTypeBits);
+#endif /* ANDROID_DEBUG */
         // Request a host visible memory type that can be used to copy our data to
         // Also request it to be coherent, so that writes are visible to the GPU right after unmapping the buffer
         memAlloc.memoryTypeIndex = getMemoryTypeIndex(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);

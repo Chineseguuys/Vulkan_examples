@@ -11,9 +11,13 @@
 #include "vulkanexamplebase.h"
 #include <ktx.h>
 #include <ktxvulkan.h>
-#ifdef DEBUG
+#if defined(DEBUG)
 #include <spdlog/spdlog.h>
-#endif //DEBUG
+#endif /* defined(DEBUG) */
+
+#if defined(ANDROID_DEBUG)
+#include "VulkanAndroid.h"
+#endif /* defined(ANDROID_DEBUG) */
 
 // Vertex layout for this example
 struct Vertex {
@@ -145,10 +149,14 @@ public:
         texture.mipLevels = ktxTexture->numLevels;
         ktx_uint8_t *ktxTextureData = ktxTexture_GetData(ktxTexture);
         ktx_size_t ktxTextureSize = ktxTexture_GetSize(ktxTexture);
-#ifdef DEBUG
+#if defined(DEBUG) 
         spdlog::info("Texture size: {}x{}, mipLevel: {}, texture size: {}", 
             texture.width, texture.height, texture.mipLevels, ktxTextureSize);
-#endif // DEBUG
+#endif /* defined(DEBUG) */
+
+#if defined(ANDROID_DEBUG)
+        LOGI("[%s:%d]Texture size: %dx%d, mipLevel: %d, texture size: %zu", __FILE__, __LINE__, texture.width, texture.height, texture.mipLevels, ktxTextureSize);
+#endif /* defined(ANDROID_DEBUG) */
 
         // We prefer using staging to copy the texture data to a device local optimal image
         VkBool32 useStaging = true;
