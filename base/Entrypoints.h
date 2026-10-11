@@ -62,6 +62,7 @@ static void perfetto_systrace_init() {
 #define VULKAN_EXAMPLE_MAIN()                                                  \
   VulkanExample *vulkanExample;                                                \
   void android_main(android_app *state) {                                      \
+    perfetto_systrace_init();                                                  \
     androidApp = state;                                                        \
     vks::android::getDeviceConfig();                                           \
     vulkanExample = new VulkanExample();                                       \

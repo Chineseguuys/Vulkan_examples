@@ -7,6 +7,7 @@
  */
 
 #include "vulkanexamplebase.h"
+#include <cstdint>
 
 #if defined(DEBUG) 
 #include "spdlog/spdlog.h"
@@ -980,12 +981,28 @@ bool VulkanExampleBase::initVulkan() {
     spdlog::info("[{}:{}]DeviceMemoryProperties:", __FILE__, __LINE__);
     spdlog::info("\t Memory Type Count: {:d}", deviceMemoryProperties.memoryTypeCount);
     spdlog::info("\t Memory Heap Count: {:d}", deviceMemoryProperties.memoryHeapCount);
+
+    for(uint32_t i = 0; i < deviceMemoryProperties.memoryHeapCount; ++i) {
+        if (deviceMemoryProperties.memoryHeaps[i].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) {
+            // Print Local GPU memory size
+            double sizeGiB = static_cast<double>(deviceMemoryProperties.memoryHeaps[i].size / (1024.0 * 1024.0 * 1024.0));
+            spdlog::info("\t\tLocal GPU memory for flags {}: {} GiB", deviceMemoryProperties.memoryHeaps[i].flags, sizeGiB);
+        }
+    }
 #endif /* DEBUG */
 
 #if defined(ANDROID_DEBUG)
     LOGI("[%s:%d]DeviceMemoryProperties:", __FILE__, __LINE__);
     LOGI("\t Memory Type Count: %d", deviceMemoryProperties.memoryTypeCount);
     LOGI("\t Memory Heap Count: %d", deviceMemoryProperties.memoryHeapCount);
+
+    for(uint32_t i = 0; i < deviceMemoryProperties.memoryHeapCount; ++i) {
+        if (deviceMemoryProperties.memoryHeaps[i].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) {
+            // Print Local GPU memory size
+            double sizeGiB = static_cast<double>(deviceMemoryProperties.memoryHeaps[i].size / (1024.0 * 1024.0 * 1024.0));
+            LOGD("\t\tLocal GPU memory for flags %0x: %.2f GiB", deviceMemoryProperties.memoryHeaps[i].flags, sizeGiB);
+        }
+    }
 #endif /* defined(ANDROID_DEBUG) */
 
     // Derived examples can override this to set actual features (based on above readings) to enable for logical device

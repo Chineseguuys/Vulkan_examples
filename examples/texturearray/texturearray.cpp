@@ -10,11 +10,16 @@
 */
 
 #include "vulkanexamplebase.h"
+#include <cstdint>
 #include <ktx.h>
 #include <ktxvulkan.h>
-#ifdef DEBUG
+#if defined (DEBUG)
 #include <spdlog/spdlog.h>
 #endif // DEBUG
+
+#if defined(ANDROID_DEBUG)
+#include "VulkanAndroid.h"
+#endif // Android debug
 
 constexpr auto MAX_LAYERS = 8;
 
@@ -59,6 +64,8 @@ public:
     VkPipelineLayout pipelineLayout{ VK_NULL_HANDLE };
     VkDescriptorSetLayout descriptorSetLayout{ VK_NULL_HANDLE };
     std::array<VkDescriptorSet, maxConcurrentFrames> descriptorSets{};
+    // overlay instance control
+    int32_t drawInstanceCount{5};
 
     VulkanExample() : VulkanExampleBase()
     {
@@ -92,6 +99,7 @@ public:
         ktxResult result;
         ktxTexture* ktxTexture;
 
+        // Get properties required for using and upload texture data from the ktx texture object
 #if defined(__ANDROID__)
         // Textures are stored inside the apk on Android (compressed)
         // So they need to be loaded via the asset manager
@@ -122,10 +130,15 @@ public:
         assert(layerCount <= MAX_LAYERS);
         ktx_uint8_t *ktxTextureData = ktxTexture_GetData(ktxTexture);
         ktx_size_t ktxTextureSize = ktxTexture_GetSize(ktxTexture);
-#ifdef DEBUG
+#if defined (DEBUG)
         spdlog::info("[{}:{}] load texture: wxh={}x{}, layerCount={}, textureSize={}", __FILE__, __LINE__,
             textureArray.width, textureArray.height, layerCount, ktxTextureSize);
 #endif // DEBUG
+
+#if defined(ANDROID_DEBUG)
+        LOGI("[%s:%d]load texture: wxh=%dx%d, layerCount=%d, textureSize=%ld", __FILE__, __LINE__,
+            textureArray.width, textureArray.height, layerCount, ktxTextureSize);
+#endif // ANDROID_DEBUG
 
         VkMemoryAllocateInfo memAllocInfo = vks::initializers::memoryAllocateInfo();
         VkMemoryRequirements memReqs;
@@ -179,10 +192,15 @@ public:
             bufferCopyRegion.imageExtent.depth = 1;
             bufferCopyRegion.bufferOffset = offset;
             bufferCopyRegions.push_back(bufferCopyRegion);
-#ifdef DEBUG
+#if defined(DEBUG)
             spdlog::info("[{}:{}] bufferCopyRegion: offset={}, width={}, height={}, depth={}", __FILE__, __LINE__,
                 offset, ktxTexture->baseWidth, ktxTexture->baseHeight, 1);
 #endif // DEBUG
+
+#if defined(ANDROID_DEBUG)
+           LOGI("[%s:%d]bufferCopyRegion: offset=%ld, width=%d, height=%d, depth=%d", __FILE__, __LINE__,
+                offset, ktxTexture->baseWidth, ktxTexture->baseHeight, 1);
+#endif // ANDROID_DEBUG
         }
 
         // Create optimal tiled target image
@@ -505,7 +523,7 @@ public:
         VkDeviceSize offsets[1] = { 0 };
         vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &vertexBuffer.buffer, offsets);
         vkCmdBindIndexBuffer(cmdBuffer, indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
-        vkCmdDrawIndexed(cmdBuffer, indexCount, layerCount, 0, 0, 0);
+        vkCmdDrawIndexed(cmdBuffer, indexCount, drawInstanceCount, 0, 0, 0);
 
         drawUI(cmdBuffer);
 
@@ -522,6 +540,12 @@ public:
         updateUniformBuffers();
         buildCommandBuffer();
         VulkanExampleBase::submitFrame();
+    }
+
+    virtual void OnUpdateUIOverlay(vks::UIOverlay *overlay) {
+        if (overlay->header("Instance Count:")) {
+            overlay->sliderInt("value", &drawInstanceCount, 1, layerCount);
+        }
     }
 };
 

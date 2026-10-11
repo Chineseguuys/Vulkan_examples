@@ -16,3 +16,6 @@
 [submodule "external/Vulkan-Headers"]
 	path = external/Vulkan-Headers
 	url = https://github.com/KhronosGroup/Vulkan-Headers.git
+[submodule "external/android_vulkan_systrace"]
+	path = external/android_vulkan_systrace
+	url = https://github.com/Chineseguuys/android_vulkan_systrace.git

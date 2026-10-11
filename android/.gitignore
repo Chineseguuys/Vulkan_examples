@@ -67,3 +67,9 @@ fastlane/readme.md
 **/assets/
 **/src/main/res/drawable/
 **/.cxx/
+
+# CMake artifacts are generated in the build dir, never in the source tree
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+*.a

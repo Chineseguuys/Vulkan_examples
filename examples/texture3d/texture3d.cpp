@@ -11,6 +11,10 @@
 #include <spdlog/spdlog.h>
 #endif // DEBUG
 
+#if defined(ANDROID_DEBUG)
+#include "VulkanAndroid.h"
+#endif /* ANDROID_DEBUG */
+
 // Vertex layout for this example
 struct Vertex {
     float pos[3];
@@ -212,6 +216,10 @@ public:
 #ifdef DEBUG
         spdlog::info("[{}:{}] maxImageDimension3D: {}", __FILE__, __LINE__, maxImageDimension3D);
 #endif // DEBUG
+
+#if defined(ANDROID_DEBUG)
+        LOGI("[%s:%d] maxImageDimension3D: %d", __FILE__, __LINE__, maxImageDimension3D);
+#endif /* ANDROID_DEBUG */
         if (width > maxImageDimension3D || height > maxImageDimension3D || depth > maxImageDimension3D)
         {
             std::cout << "Error: Requested texture dimensions is greater than supported 3D texture dimension!" << std::endl;
