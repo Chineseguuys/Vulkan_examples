@@ -399,7 +399,8 @@ namespace vks
     *
     * @return VK_SUCCESS if buffer handle and memory have been created and (optionally passed) data has been copied
     */
-    VkResult VulkanDevice::createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, vks::Buffer *buffer, VkDeviceSize size, void *data)
+    VkResult VulkanDevice::createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags,
+        vks::Buffer *buffer, VkDeviceSize size, void *data)
     {
         buffer->device = logicalDevice;
 

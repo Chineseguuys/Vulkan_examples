@@ -2,7 +2,7 @@
 
 layout (binding = 1) uniform samplerCube samplerColor;
 
-layout (binding = 0) uniform UBO
+layout (std140,binding = 0) uniform UBO
 {
     mat4 projection;
     mat4 model;

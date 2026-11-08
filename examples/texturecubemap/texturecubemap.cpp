@@ -9,6 +9,7 @@
 * This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
 */
 
+#include "vulkan/vulkan_core.h"
 #include "vulkanexamplebase.h"
 #include "VulkanglTFModel.h"
 #include <ktx.h>
